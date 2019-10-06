@@ -1,4 +1,4 @@
-# Add all libraries for the bot
+# Import all need libraries for the bot
 import json
 import apiai
 import pyowm
@@ -18,8 +18,8 @@ from aiogram.types import ParseMode, InputMediaPhoto, InputMediaVideo, ChatActio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import TOKEN
-from config import TOKEN_DIALOGFLOW
 from config import PROXY_URL
+# from config import TOKEN_DIALOGFLOW
 
 
 # Create log string
@@ -27,7 +27,24 @@ logging.basicConfig(format=u'%(filename)s [ LINE:%(lineno)+3s ]#%(levelname)+8s 
 
 # pass to bot token and proxy url
 bot = Bot(token=TOKEN, proxy=PROXY_URL)
+# bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+
+
+def get_weather(arr):
+    answer = ''
+    for i in arr:
+        owm = pyowm.OWM('70732ac514bf006244ac74c5f31de5aa', language='ru')
+        town = i
+        obs = owm.weather_at_place(town)
+        weather = obs.get_weather()
+        temp = weather.get_temperature('celsius')['temp']
+        temp = round(temp)
+        wind = weather.get_wind()['speed']
+        wind = round(wind)
+        status = weather.get_detailed_status()
+        answer += f'<b>{town}</b>\nt: {temp} °C, w: {wind} м/с, {status}.\n'
+    return answer
 
 
 # Create function which process connand /start
@@ -43,6 +60,14 @@ async def process_help_command(message: types.Message):
     await message.reply(msg, parse_mode=ParseMode.HTML)
 
 
+# Create function which process connand /weather
+@dp.message_handler(commands=['weather'])
+async def process_weather_command(message: types.Message):
+    arr = ['Москва', 'Екатеринбург', 'Омск', 'Петухово', 'Тамань']#, 'Тамань' 'Шерегеш',
+    msg = get_weather(arr)
+    await bot.send_message(message.chat.id, msg, reply_to_message_id=message.message_id, parse_mode=ParseMode.HTML)
+
+'''
 # Create function which process connand /weather
 @dp.message_handler(commands=['weather'])
 async def process_weather_command(message: types.Message):
@@ -89,7 +114,7 @@ async def process_weather_command(message: types.Message):
     status_S = w_S.get_detailed_status()
     msg = '<b>Москва:</b>\nt: {0}, w: {2:2} м/с, {1}.\n<b>Екатеринбург:</b>\nt: {3}, w: {5} м/с, {4}.\n<b>Омск:</b>\nt: {6}, w: {8} м/с, {7}.\n<b>Петухово:</b>\nt: {9}, w: {11} м/с, {10}.\n<b>Шерегеш:</b>\nt: {12}, w: {14:2} м/с, {13}.'.format( str(temp_M) + '°C', status_M, wind_M, str(temp_E) + '°C', status_E, wind_E, str(temp_O) + '°C', status_O, wind_O, str(temp_P) + '°C', status_P, wind_P, str(temp_S) + '°C', status_S, wind_S )
     await bot.send_message(message.chat.id, msg, reply_to_message_id=message.message_id, parse_mode=ParseMode.HTML)
-
+'''
 
 # Create function which process connand /rates
 @dp.message_handler(commands=['rates'])
@@ -239,7 +264,7 @@ async def process_crypto_ticker_command(message: types.Message):
     msg = '<code>{0:20}{1}\n{2:20}#{3}\n{4:20}{5}\n{6:20}${7}\n{8:20}${9}\n{10:20}{11}%\n{12:20}{13}%\n{14:20}{15}%</code>'.format('Coin name:', name,'Market ticker:', symbol, 'Price BTC:', price_btc, 'Price USD:', price, 'Market cap:', market, 'Change 1h:', change_1h, 'Change 24h:', change_24h, 'Change 7d:', change_7d )
     await bot.send_message(message.chat.id, msg, parse_mode=ParseMode.HTML)
 
-
+'''
 # Create function which process any text message from user
 # and resend their to Dialogflow
 @dp.message_handler()
@@ -256,7 +281,7 @@ async def dialog_flow_message(message: types.Message):
     else:
         msg = 'Ты чо мелешь паскуда?'
         await bot.send_message(message.chat.id, msg, parse_mode=ParseMode.HTML)
-
+'''
 
 # Create function which process any text message from user
 @dp.message_handler()

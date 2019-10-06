@@ -1,0 +1,9 @@
+apiai
+pyowm
+asyncio
+requests
+datetime
+bs4
+aiogram
+emoji
+apscheduler
